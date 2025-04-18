@@ -39,6 +39,7 @@ import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
+import com.amazonaws.auth.STSAssumeRoleSessionCredentialsProvider;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
@@ -60,6 +61,7 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
+import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClient;
 import com.amazonaws.util.AwsHostNameUtils;
 import com.amazonaws.util.Base64;
 import com.amazonaws.util.RuntimeHttpUtils;
@@ -163,15 +165,27 @@ public class S3AUnderFileSystem extends ObjectUnderFileSystem {
    */
   public static AWSCredentialsProvider createAwsCredentialsProvider(
       UnderFileSystemConfiguration conf) {
+    AWSCredentialsProvider credentialsProvider;
     // Set the aws credential system properties based on Alluxio properties, if they are set;
     // otherwise, use the default credential provider.
     if (conf.isSet(PropertyKey.S3A_ACCESS_KEY)
         && conf.isSet(PropertyKey.S3A_SECRET_KEY)) {
-      return new AWSStaticCredentialsProvider(new BasicAWSCredentials(
+      credentialsProvider = new AWSStaticCredentialsProvider(new BasicAWSCredentials(
           conf.getString(PropertyKey.S3A_ACCESS_KEY), conf.getString(PropertyKey.S3A_SECRET_KEY)));
+    } else {
+      // Checks, in order, env variables, system properties, profile file, and instance profile.
+      credentialsProvider = new DefaultAWSCredentialsProviderChain();
     }
-    // Checks, in order, env variables, system properties, profile file, and instance profile.
-    return new DefaultAWSCredentialsProviderChain();
+
+    if (conf.isSet(PropertyKey.S3A_IAM_ROLE)) {
+      return new STSAssumeRoleSessionCredentialsProvider.Builder(
+              conf.getString(PropertyKey.S3A_IAM_ROLE), "alluxio")
+          .withStsClient(
+              AWSSecurityTokenServiceClient.builder().withCredentials(credentialsProvider).build())
+          .build();
+    }
+
+    return credentialsProvider;
   }
 
   /**

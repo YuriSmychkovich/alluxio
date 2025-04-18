@@ -41,12 +41,15 @@ RUN cd /opt && \
     (if ls | grep -q ".tar.gz"; then tar -xzf *.tar.gz && rm *.tar.gz; fi) && \
     ln -s alluxio-* alluxio
 
+COPY build/alluxio-server-2.9.5.jar /opt/alluxio/assembly/alluxio-server-2.9.5.jar
+COPY build/alluxio-underfs-s3a-2.9.5.jar /opt/alluxio/lib/alluxio-underfs-s3a-2.9.5.jar
+
 RUN if [ ${ENABLE_DYNAMIC_USER} = "true" ] ; then \
        chmod -R 777 /opt/* ; \
     fi
 
 # Configure Java
-FROM centos:7 as build_java8
+FROM quay.io/centos/centos:stream9 as build_java8
 RUN \
     yum update -y && yum upgrade -y && \
     yum install -y java-1.8.0-openjdk-devel java-1.8.0-openjdk && \
@@ -55,7 +58,7 @@ ENV JAVA_HOME /usr/lib/jvm/java-1.8.0-openjdk
 # Disable JVM DNS cache in java8 (https://github.com/Alluxio/alluxio/pull/9452)
 RUN echo "networkaddress.cache.ttl=0" >> /usr/lib/jvm/java-1.8.0-openjdk/jre/lib/security/java.security
 
-FROM centos:7 as build_java11
+FROM quay.io/centos/centos:stream9 as build_java11
 RUN \
     yum update -y && yum upgrade -y && \
     yum install -y java-11-openjdk-devel java-11-openjdk && \
@@ -82,7 +85,7 @@ RUN \
     cd .. && \
     rm -rf libfuse && \
     yum remove -y gcc gcc-c++ make cmake gettext-devel libtool autoconf wget git && \
-    yum install -y fuse3 fuse3-devel fuse3-lib && \
+    yum install -y fuse3 fuse3-devel fuse3-libs && \
     yum clean all
 
 # Configuration for the modified libfuse2

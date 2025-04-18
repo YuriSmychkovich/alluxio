@@ -1845,6 +1845,13 @@ public final class PropertyKey implements Comparable<PropertyKey> {
       .setScope(Scope.SERVER)
       .setDisplayType(DisplayType.CREDENTIALS)
       .build();
+  public static final PropertyKey S3A_IAM_ROLE = stringBuilder(Name.S3A_IAM_ROLE)
+          .setAlias(Name.AWS_IAM_ROLE)
+          .setDescription("The IAM role to assume for S3 bucket access.")
+          .setConsistencyCheckLevel(ConsistencyCheckLevel.ENFORCE)
+          .setScope(Scope.SERVER)
+          .setDisplayType(DisplayType.CREDENTIALS)
+          .build();
   public static final PropertyKey SWIFT_AUTH_METHOD_KEY = stringBuilder(Name.SWIFT_AUTH_METHOD_KEY)
       .setDescription("Choice of authentication method: "
           + "[tempauth (default), swiftauth, keystone, keystonev3].")
@@ -8078,8 +8085,10 @@ public final class PropertyKey implements Comparable<PropertyKey> {
     public static final String OSS_SECRET_KEY = "fs.oss.accessKeySecret";
     public static final String S3A_ACCESS_KEY = "s3a.accessKeyId";
     public static final String S3A_SECRET_KEY = "s3a.secretKey";
+    public static final String S3A_IAM_ROLE = "s3a.iamRole";
     public static final String AWS_ACCESS_KEY = "aws.accessKeyId";
     public static final String AWS_SECRET_KEY = "aws.secretKey";
+    public static final String AWS_IAM_ROLE = "aws.iamRole";
     public static final String SWIFT_AUTH_METHOD_KEY = "fs.swift.auth.method";
     public static final String SWIFT_AUTH_URL_KEY = "fs.swift.auth.url";
     public static final String SWIFT_PASSWORD_KEY = "fs.swift.password";
