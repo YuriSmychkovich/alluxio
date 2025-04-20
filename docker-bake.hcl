@@ -1,17 +1,21 @@
+variable "image" {
+  default = "alluxio"
+}
+
+variable "version" {
+  default = "2.9.5"
+}
+
 variable "build" {
   default = 0
 }
 
 variable "tag" {
-  default = "latest"
+  default = "${version}.${build}"
 }
 
 variable "registry" {
   default = "localhost:5005"
-}
-
-variable "image" {
-  default = "alluxio"
 }
 
 target "alluxio" {

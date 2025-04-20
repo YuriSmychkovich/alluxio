@@ -41,6 +41,7 @@ RUN cd /opt && \
     (if ls | grep -q ".tar.gz"; then tar -xzf *.tar.gz && rm *.tar.gz; fi) && \
     ln -s alluxio-* alluxio
 
+COPY build/alluxio-client-2.9.5.jar /opt/alluxio/assembly/alluxio-client-2.9.5.jar
 COPY build/alluxio-server-2.9.5.jar /opt/alluxio/assembly/alluxio-server-2.9.5.jar
 COPY build/alluxio-underfs-s3a-2.9.5.jar /opt/alluxio/lib/alluxio-underfs-s3a-2.9.5.jar
 
@@ -107,7 +108,8 @@ ARG ENABLE_DYNAMIC_USER=true
 # Add Tini for Alluxio helm charts (https://github.com/Alluxio/alluxio/pull/12233)
 # - https://github.com/krallin/tini
 ENV TINI_VERSION v0.18.0
-ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini-static /usr/local/bin/tini
+ARG TARGETARCH
+ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini-static-${TARGETARCH} /usr/local/bin/tini
 RUN chmod +x /usr/local/bin/tini
 
 # If Alluxio user, group, gid, and uid aren't root|0, create the alluxio user and set file permissions accordingly
